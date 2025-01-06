@@ -74,13 +74,12 @@ enum mission_type_enum {
   trabalho
   exerc_cio_f_sico @map("exercício físico")
 }
-
 enum rating_enum {
-  // 1 @map("1")
-  // 2 @map("2")
-  // 3 @map("3")
-  // 4 @map("4")
-  // 5 @map("5")
+  ONE @map("1")
+  TWO @map("2")
+  THREE @map("3")
+  FOUR @map("4")
+  FIVE @map("5")
 }
 
 enum status_enum {
