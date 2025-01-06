@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { PropsEnv } from 'src/shared/env/type-env';
+import { PropsEnv } from 'src/configs/type-env';
 
 @Module({
   imports: [
