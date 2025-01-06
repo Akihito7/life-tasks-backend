@@ -1,5 +1,6 @@
-import { Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SignupDTO } from './dto/request';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -8,5 +9,7 @@ export class AuthController {
   @ApiResponse({ status: 204, description: 'User created successfully.' })
   @Post('signup')
   @HttpCode(204)
-  async signup() {}
+  async signup(@Body() body: SignupDTO) {
+    return;
+  }
 }
