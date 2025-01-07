@@ -18,7 +18,7 @@ export class AuthService {
       where: { username },
     });
 
-    if (doesUsernameExist) throw new ConflictException('User already exists.');
+    if (doesUsernameExist) throw new ConflictException('Username already exists.');
 
     const passwordHashed = await hash(password, 8);
 
