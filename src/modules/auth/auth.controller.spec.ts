@@ -1,17 +1,34 @@
-import { ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('Auth Controller Tests', () => {
+  let jwtService: JwtService;
   let prismaService: PrismaService;
-  let authController: AuthController;
   let authService: AuthService;
 
-  beforeEach(() => {
-    prismaService = new PrismaService();
-    authService = new AuthService(prismaService);
-    authController = new AuthController(authService);
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        JwtModule.register({
+          secret: '16212944',
+          signOptions: { expiresIn: '1h' },
+        }),
+      ],
+      providers: [AuthService, PrismaService],
+      controllers: [AuthController],
+    }).compile();
+
+    prismaService = module.get<PrismaService>(PrismaService);
+    jwtService = module.get<JwtService>(JwtService);
+    authService = module.get<AuthService>(AuthService);
   });
 
   describe('Signup', () => {
@@ -66,17 +83,63 @@ describe('Auth Controller Tests', () => {
         ...userDTO,
         email: 'akihito@gmail.com',
       });
-      try {
-        await authService.signup(userDTO);
-      } catch (error) {
-        await expect(authService.signup(userDTO)).rejects.toThrow(
-          ConflictException,
-        );
 
-        await expect(authService.signup(userDTO)).rejects.toThrow(
-          'Username already exists.',
-        );
-      }
+      await expect(authService.signup(userDTO)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(authService.signup(userDTO)).rejects.toThrow(
+        'Username already exists.',
+      );
+    });
+  });
+
+  describe('Signln', () => {
+    it('Should return token', async () => {
+      const userSignupDTO = {
+        id: 1,
+        name: 'Guilherme Akihito',
+        email: 'akihitopro22@gmail.com',
+        username: 'akihito',
+        password: 'admin123',
+      };
+
+      const userSignlnDTO = {
+        email: 'akihitopro22@gmail.com',
+        password: 'admin123',
+      };
+
+      await authService.signup(userSignupDTO);
+
+      const response = await authService.signln(userSignlnDTO);
+
+      expect(response).toHaveProperty('token');
+      expect(response.token).toMatch(
+        /^[A-Za-z0-9-_=]+\.([A-Za-z0-9-_=]+)\.([A-Za-z0-9-_=]+)?$/,
+      );
+    });
+
+    it('Should throw error credentials', async () => {
+      const userSignupDTO = {
+        id: 1,
+        name: 'Guilherme Akihito',
+        email: 'akihitopro22@gmail.com',
+        username: 'akihito',
+        password: 'admin123',
+      };
+
+      const userSignlnDTO = {
+        email: 'akihitopro21@gmail.com',
+        password: 'admin123',
+      };
+
+      await authService.signup(userSignupDTO);
+
+      await expect(authService.signln(userSignlnDTO)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(authService.signln(userSignlnDTO)).rejects.toThrow(
+        'Invalid Credentials',
+      );
     });
   });
 
