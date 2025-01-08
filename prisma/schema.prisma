@@ -20,7 +20,7 @@ model task_notes {
 }
 
 model tasks {
-  task_id           Int                @id
+  task_id             Int              @id @default(autoincrement())
   user_id           Int?
   title             String?            @db.VarChar(255)
   description       String?
